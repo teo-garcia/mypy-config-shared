@@ -44,34 +44,40 @@ Get the path to the installed config file:
 uv run teo-mypy-config-path
 ```
 
-Use `extends` in your project's `mypy.ini` (mypy supports `extends` in `.ini` format, not in `pyproject.toml`):
+Use the exported config directly when you want the shared baseline without
+project-specific overrides:
 
-```ini
-[mypy]
-extends = /path/from/teo-mypy-config-path
-plugins = pydantic.mypy
+```bash
+uv run mypy --config-file "$(uv run teo-mypy-config-path)" .
+```
 
-[[mypy.overrides]]
+For projects that need plugins or module overrides, copy the baseline into the
+project's own config and add local settings there. mypy does not merge multiple
+config files, so this package intentionally does not document an inheritance
+contract.
+
+```toml
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
 module = ["redis.*"]
 ignore_missing_imports = true
 ```
 
-For a portable setup, generate a `mypy.extend.ini` (gitignored) via Makefile:
-
-```makefile
-mypy-config:
-    @printf "[mypy]\nextends = %s\n" "$(shell uv run teo-mypy-config-path)" > mypy.extend.ini
-```
-
-Then your `mypy.ini` at project root:
+Equivalent `mypy.ini` syntax:
 
 ```ini
 [mypy]
-extends = mypy.extend.ini
-# project-specific overrides below
-```
+python_version = 3.12
+strict = true
+plugins = pydantic.mypy
 
-Add `mypy.extend.ini` to `.gitignore`.
+[mypy-redis.*]
+ignore_missing_imports = true
+```
 
 ---
 
