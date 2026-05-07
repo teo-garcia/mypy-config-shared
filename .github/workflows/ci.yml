@@ -38,4 +38,7 @@ jobs:
         run: uv run mypy src/
 
       - name: Validate mypy config
-        run: uv run mypy --config-file src/teo_mypy_config_shared/mypy.ini --version
+        run: uv run mypy --config-file src/teo_mypy_config_shared/mypy.ini tests/fixtures/consumer
+
+      - name: Consumer smoke check
+        run: uv run mypy --config-file "$(uv run teo-mypy-config-path)" tests/fixtures/consumer
