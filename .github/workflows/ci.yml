@@ -13,6 +13,9 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.14"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -28,22 +31,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Lint
-        run: uv run ruff check .
-
-      - name: Format check
-        run: uv run ruff format --check .
-
-      - name: Type check
-        run: uv run mypy src/
-
-      - name: Validate mypy config
-        run: uv run mypy --config-file src/teo_mypy_config_shared/mypy.ini tests/fixtures/consumer
-
-      - name: Consumer smoke check
-        run: uv run mypy --config-file "$(uv run teo-mypy-config-path)" tests/fixtures/consumer
+      - name: Check
+        run: make check PYTHON=python
